@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batman & Batwoman - Glowing Night</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #050510;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+
+        /* Letter Popup Modal */
+        #letterModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 320px;
+            padding: 25px;
+            background: rgba(20, 15, 30, 0.92);
+            border: 2px solid #ff4d6d;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(255, 77, 109, 0.6);
+            color: #fff0f3;
+            text-align: center;
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 10;
+        }
+
+        #letterModal.open {
+            display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        #letterModal h2 {
+            font-size: 1.4rem;
+            color: #ff8fa3;
+            margin-bottom: 12px;
+        }
+
+        #letterModal p {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #f8edeb;
+            margin-bottom: 20px;
+        }
+
+        #closeBtn {
+            background: #ff4d6d;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s ease;
+        }
+
+        #closeBtn:hover {
+            background: #ff0054;
+        }
+
+        #hintText {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: #ff8fa3;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="nightCanvas"></canvas>
+    
+    <div id="hintText">✨ Click the glowing letter ✨</div>
+
+    <!-- The Love Letter -->
+    <div id="letterModal">
+        <h2>To My Hero 🖤</h2>
+        <p>My love for you in my heart has no end, like the sky with no borders. Can I be the reason you actually smile under that mask?</p>
+        <button id="closeBtn" onclick="closeLetter()">Close Note</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('nightCanvas');
+        const ctx = canvas.getContext('2d');
+        const modal = document.getElementById('letterModal');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        let letterX = width / 2;
+        let letterY = height - 150;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initStars();
+        });
+
+        // 100 Glowing Stars
+        const numStars = 100;
+        let stars = [];
+
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * (height * 0.7),
+                    radius: Math.random() * 2 + 1,
+                    glow: Math.random() * 10 + 5,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.02 + 0.005
+                });
+            }
+        }
+
+        function drawStars() {
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0.2) {
+                    star.speed = -star.speed;
+                }
+
+                ctx.save();
+                ctx.shadowBlur = star.glow;
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(star.alpha)})`;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        // Batman
+        function drawBatman(x, y) {
+            ctx.save();
+            ctx.fillStyle = '#111625';
+            
+            ctx.beginPath();
+            ctx.moveTo(x - 25, y);
+            ctx.lineTo(x - 20, y - 60);
+            ctx.lineTo(x - 12, y - 75);
+            ctx.lineTo(x + 12, y - 75);
+            ctx.lineTo(x + 20, y - 60);
+            ctx.lineTo(x + 25, y);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(x, y - 85, 12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(x - 10, y - 88);
+            ctx.lineTo(x - 14, y - 105);
+            ctx.lineTo(x - 4, y - 93);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y - 88);
+            ctx.lineTo(x + 14, y - 105);
+            ctx.lineTo(x + 4, y - 93);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(x - 20, y - 60);
+            ctx.quadraticCurveTo(x - 45, y - 20, x - 35, y);
+            ctx.lineTo(x - 20, y);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // Batwoman
+        function drawBatwoman(x, y) {
+            ctx.save();
+            
+            ctx.fillStyle = '#a61c1c';
+            ctx.beginPath();
+            ctx.moveTo(x - 10, y - 85);
+            ctx.quadraticCurveTo(x + 25, y - 50, x + 15, y - 20);
+            ctx.lineTo(x + 5, y - 20);
+            ctx.quadraticCurveTo(x + 15, y - 55, x - 5, y - 80);
+            ctx.fill();
+
+            ctx.fillStyle = '#181528';
+            ctx.beginPath();
+            ctx.moveTo(x - 20, y);
+            ctx.lineTo(x - 15, y - 55);
+            ctx.lineTo(x - 10, y - 72);
+            ctx.lineTo(x + 10, y - 72);
+            ctx.lineTo(x + 15, y - 55);
+            ctx.lineTo(x + 20, y);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(x, y - 82, 10, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(x - 8, y - 85);
+            ctx.lineTo(x - 12, y - 102);
+            ctx.lineTo(x - 3, y - 90);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(x + 8, y - 85);
+            ctx.lineTo(x + 12, y - 102);
+            ctx.lineTo(x + 3, y - 90);
+            ctx.fill();
+
+            ctx.fillStyle = '#d92323';
+            ctx.beginPath();
+            ctx.arc(x, y - 62, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // Glowing Love Letter
+        let letterPulse = 0;
+
+        function drawLoveLetter(x, y) {
+            letterPulse += 0.03;
+            const glowAmount = 15 + Math.sin(letterPulse) * 8;
+
+            ctx.save();
+            
+            ctx.shadowBlur = glowAmount;
+            ctx.shadowColor = '#ff4d6d';
+
+            ctx.fillStyle = '#fff0f3';
+            ctx.fillRect(x - 20, y - 15, 40, 28);
+
+            ctx.strokeStyle = '#ff8fa3';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x - 20, y - 15);
+            ctx.lineTo(x, y);
+            ctx.lineTo(x + 20, y - 15);
+            ctx.stroke();
+
+            ctx.fillStyle = '#ff0054';
+            ctx.beginPath();
+            ctx.arc(x - 3, y - 2, 3, 0, Math.PI * 2);
+            ctx.arc(x + 3, y - 2, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(x - 6, y - 1);
+            ctx.lineTo(x, y + 5);
+            ctx.lineTo(x + 6, y - 1);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // Rooftop
+        function drawRooftop() {
+            ctx.fillStyle = '#0a0d14';
+            ctx.fillRect(0, height - 100, width, 100);
+
+            ctx.fillStyle = '#151a26';
+            ctx.fillRect(0, height - 110, width, 10);
+        }
+
+        // Click Handler to Open Letter
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            // Check if click was near the letter
+            if (Math.abs(clickX - letterX) < 30 && Math.abs(clickY - letterY) < 30) {
+                modal.classList.add('open');
+            }
+        });
+
+        function closeLetter() {
+            modal.classList.remove('open');
+        }
+
+        // Main Loop
+        initStars();
+
+        function animate() {
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#020208');
+            gradient.addColorStop(0.7, '#0d111a');
+            gradient.addColorStop(1, '#1a1c29');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            drawStars();
+            drawRooftop();
+
+            const centerX = width / 2;
+            const groundY = height - 100;
+            letterX = centerX;
+            letterY = groundY - 50;
+
+            drawBatman(centerX - 40, groundY);
+            drawBatwoman(centerX + 40, groundY);
+            drawLoveLetter(letterX, letterY);
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
